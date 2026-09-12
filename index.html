@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Fat Loss</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fat Loss">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12120f" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f4f3f0; --surface:#fcfcfb; --line:#e2e0da; --line-soft:#edebe6;
+  --ink:#0b0b0b; --ink-2:#52514e; --ink-3:#84827b;
+  --s1:#2a78d6; --s2:#eb6834;
+  --ok:#008300; --warn:#a86400; --bad:#c3302f;
+  --accent:#2a78d6; --accent-ink:#ffffff;
+  --chip:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#12120f; --surface:#1f1f1c; --line:#34342f; --line-soft:#2a2a26;
+    --ink:#ffffff; --ink-2:#c3c2b7; --ink-3:#8d8c83;
+    --s1:#3987e5; --s2:#d95926;
+    --ok:#4caf50; --warn:#eda100; --bad:#e66767;
+    --accent:#3987e5; --accent-ink:#ffffff;
+    --chip:#2a2a26;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(150px + env(safe-area-inset-bottom));
+  overscroll-behavior-y:contain;
+}
+button,input,select{font:inherit;color:inherit}
+button{background:none;border:0;padding:0;cursor:pointer}
+.wrap{max-width:520px;margin:0 auto;padding:0 14px}
+h1{font-size:19px;margin:0;font-weight:650;letter-spacing:-.2px}
+h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.6px}
+.muted{color:var(--ink-3);font-size:14px}
+.hdr{
+  position:sticky;top:0;z-index:20;background:var(--bg);
+  padding-top:calc(env(safe-area-inset-top) + 10px);padding-bottom:8px;
+  display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line-soft)
+}
+.hdr .nav{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--ink-2);border-radius:12px}
+.hdr .nav:active{background:var(--line-soft)}
+.hdr .mid{flex:1;text-align:center;min-width:0}
+.hdr .sub{font-size:12px;color:var(--ink-3);margin-top:1px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0}
+.chips{display:flex;gap:8px}
+.chip{flex:1;min-height:56px;border:1px solid var(--line);background:var(--chip);border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  font-size:15px;font-weight:600;color:var(--ink-2)}
+.chip small{font-size:11px;font-weight:500;color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip[aria-pressed="true"] small{color:rgba(255,255,255,.85)}
+.hours{display:flex;gap:10px;margin-top:12px}
+.stepper{flex:1;display:flex;align-items:center;justify-content:space-between;
+  border:1px solid var(--line);border-radius:14px;background:var(--chip);padding:4px}
+.stepper b{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:500;color:var(--accent);border-radius:10px}
+.stepper b:active{background:var(--line-soft)}
+.stepper .val{text-align:center;line-height:1.1}
+.stepper .val span{display:block;font-size:18px;font-weight:650}
+.stepper .val small{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.4px}
+.stat{margin:16px 0}
+.stat:first-child{margin-top:4px}
+.stat .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.stat .lbl{font-size:13px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.6px}
+.stat .num{font-size:26px;font-weight:680;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+.stat .num i{font-style:normal;font-size:15px;font-weight:550;color:var(--ink-3)}
+.stat .note{font-size:13px;color:var(--ink-2);margin-top:5px;font-variant-numeric:tabular-nums}
+.bar{height:10px;border-radius:6px;background:var(--line-soft);margin-top:8px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--accent);transition:width .2s}
+.bar i.over{background:var(--warn)}
+.bar i.good{background:var(--ok)}
+.banner{background:var(--warn);color:#12120f;border-radius:14px;padding:12px 14px;margin:12px 0;
+  display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600}
+.banner button{margin-left:auto;width:40px;height:40px;font-size:20px;flex:none;color:#12120f;opacity:.7}
+.fab{position:fixed;right:16px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:30;
+  width:64px;height:64px;border-radius:32px;background:var(--accent);color:var(--accent-ink);
+  font-size:34px;font-weight:300;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 20px rgba(0,0,0,.28)}
+.fab:active{transform:scale(.94)}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;
+  background:var(--surface);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;padding:10px 0 12px;font-size:11.5px;font-weight:600;color:var(--ink-3);
+  display:flex;flex-direction:column;align-items:center;gap:3px;letter-spacing:.3px}
+.tabs button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round}
+.tabs button[aria-current="true"]{color:var(--accent)}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line-soft)}
+.list li:last-child{border-bottom:0}
+.list .nm{flex:1;min-width:0;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list .kc{font-variant-numeric:tabular-nums;font-size:14px;color:var(--ink-2);white-space:nowrap}
+.del{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-3);font-size:19px;border-radius:12px}
+.del:active{background:var(--line-soft)}
+.fav{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;margin-bottom:8px;
+  background:var(--chip);border:1px solid var(--line);border-radius:14px;text-align:left;min-height:54px}
+.fav .nm{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fav .kc{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fav.seed .nm{font-weight:500;color:var(--ink-2)}
+.sheet{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:none;align-items:flex-end}
+.sheet.open{display:flex}
+.sheet .panel{width:100%;max-height:92vh;overflow:auto;background:var(--bg);
+  border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 14px;font-size:18px;font-weight:650}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.field input{width:100%;min-height:52px;padding:10px 14px;border-radius:14px;
+  border:1px solid var(--line);background:var(--surface);font-size:17px}
+.field input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.two{display:flex;gap:10px}
+.two .field{flex:1}
+.btn{width:100%;min-height:54px;border-radius:16px;background:var(--accent);color:var(--accent-ink);
+  font-size:17px;font-weight:650;display:flex;align-items:center;justify-content:center}
+.btn:active{opacity:.85}
+.btn.ghost{background:none;color:var(--ink-2);font-weight:550;min-height:48px}
+.btn.small{min-height:46px;font-size:15px}
+.sug{font-size:15.5px;line-height:1.5}
+.sug .t{font-weight:680;font-size:17px;margin-bottom:6px;display:block}
+.sug.alert .t{color:var(--bad)}
+.sug.good .t{color:var(--ok)}
+.sug .extra{margin-top:10px;padding-top:10px;border-top:1px solid var(--line-soft);
+  font-size:14px;color:var(--ink-2)}
+.viz{width:100%;display:block;touch-action:pan-y}
+.readout{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;min-height:19px;
+  margin-bottom:2px;text-align:center}
+.legend{display:flex;gap:14px;justify-content:center;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend i{width:11px;height:11px;border-radius:3px;display:block}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th{text-align:right;font-size:11px;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.5px;font-weight:600;padding:0 0 6px}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:9px 0;border-top:1px solid var(--line-soft);text-align:right}
+.tbl td:first-child{text-align:left;color:var(--ink-2)}
+.tbl td:last-child{width:44px}
+.hide{display:none}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+
+  <!-- ============ TODAY ============ -->
+  <section id="v-today">
+    <header class="hdr">
+      <button class="nav" id="prevDay" aria-label="Previous day">&#8249;</button>
+      <div class="mid"><h1 id="dayTitle">Today</h1><div class="sub" id="daySub"></div></div>
+      <button class="nav" id="nextDay" aria-label="Next day">&#8250;</button>
+    </header>
+
+    <div id="banner"></div>
+
+    <div class="card">
+      <div class="chips" id="typeChips"></div>
+      <div class="hours" id="hours"></div>
+    </div>
+
+    <div class="card" id="stats"></div>
+  </section>
+
+  <!-- ============ LOG ============ -->
+  <section id="v-log" class="hide">
+    <header class="hdr"><div class="mid"><h1>Food log</h1><div class="sub" id="logSub"></div></div></header>
+    <div class="card"><ul class="list" id="foodList"></ul></div>
+  </section>
+
+  <!-- ============ PROGRESS ============ -->
+  <section id="v-prog" class="hide">
+    <header class="hdr"><div class="mid"><h1>Progress</h1><div class="sub" id="progSub"></div></div></header>
+
+    <div class="card">
+      <h2>Weight &amp; waist</h2>
+      <div class="readout" id="readout">&nbsp;</div>
+      <div id="chart"></div>
+      <div class="legend">
+        <span><i style="background:var(--s1)"></i>Weight (kg)</span>
+        <span><i style="background:var(--s2)"></i>Waist (cm)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>This week's suggestion</h2>
+      <div id="suggestion"></div>
+    </div>
+
+    <div class="card">
+      <h2>Check-ins</h2>
+      <button class="btn small" id="addCheckin">+ Weekly check-in</button>
+      <table class="tbl" id="ckTable"></table>
+    </div>
+  </section>
+
+</main>
+
+<button class="fab hide" id="fab" aria-label="Add food">+</button>
+
+<nav class="tabs">
+  <button data-tab="today" aria-current="true">
+    <svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Today</button>
+  <button data-tab="log">
+    <svg viewBox="0 0 24 24"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Log</button>
+  <button data-tab="prog">
+    <svg viewBox="0 0 24 24"><path d="M4 19V6M4 19h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>Progress</button>
+</nav>
+
+<!-- ============ FOOD SHEET ============ -->
+<div class="sheet" id="foodSheet">
+  <div class="panel">
+    <h3 id="foodSheetTitle">Add food</h3>
+    <div id="favs"></div>
+    <div class="field"><label for="fName">Name</label>
+      <input id="fName" type="text" autocomplete="off" autocapitalize="none" enterkeyhint="next"></div>
+    <div class="two">
+      <div class="field"><label for="fCal">Calories</label>
+        <input id="fCal" type="number" inputmode="numeric" step="10" min="0" enterkeyhint="next"></div>
+      <div class="field"><label for="fPro">Protein g</label>
+        <input id="fPro" type="number" inputmode="numeric" step="1" min="0" enterkeyhint="done"></div>
+    </div>
+    <button class="btn" id="fSave">Save</button>
+    <button class="btn ghost" data-close>Cancel</button>
+  </div>
+</div>
+
+<!-- ============ CHECK-IN SHEET ============ -->
+<div class="sheet" id="ckSheet">
+  <div class="panel">
+    <h3>Weekly check-in</h3>
+    <div class="field"><label for="cDate">Date</label><input id="cDate" type="date"></div>
+    <div class="two">
+      <div class="field"><label for="cW">Weight kg</label>
+        <input id="cW" type="number" inputmode="decimal" step="0.1" min="0"></div>
+      <div class="field"><label for="cWa">Waist cm</label>
+        <input id="cWa" type="number" inputmode="decimal" step="0.5" min="0"></div>
+    </div>
+    <button class="btn" id="cSave">Save</button>
+    <button class="btn ghost" data-close>Cancel</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ config */
+var PROTEIN_TARGET = 170;
+var FLOOR = 1900;                 // never go below this on any day
+var KCAL_PER_WORK_HOUR = 60;
+var KCAL_PER_DRIVE_HOUR = 15;
+var TYPES = {
+  shop:    {label:'Shop',    hint:'~8h',      base:2400, work:8,  drive:0, wk:true,  dv:false},
+  install: {label:'Install', hint:'site',     base:2800, work:10, drive:3, wk:true,  dv:true },
+  home:    {label:'Home',    hint:'low',      base:2000, work:0,  drive:0, wk:false, dv:false}
+};
+var SEEDS = [
+  {n:'Labneh',        c:150, p:6,  seed:true},
+  {n:'Cheese',        c:220, p:14, seed:true},
+  {n:'Eggs',          c:220, p:19, seed:true},
+  {n:'Peanut butter', c:190, p:8,  seed:true},
+  {n:'Rice + chicken',c:650, p:45, seed:true},
+  {n:'Tea + sweets',  c:250, p:3,  seed:true}
+];
+var KEY = 'fatloss.v1';
+
+/* ------------------------------------------------------------------- dates */
+function iso(d){ var z=new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
+function parseD(s){ var a=s.split('-'); return new Date(+a[0], +a[1]-1, +a[2]); }
+function addDays(s,n){ var d=parseD(s); d.setDate(d.getDate()+n); return iso(d); }
+function today(){ return iso(new Date()); }
+function weekStart(s){ var d=parseD(s), k=(d.getDay()+6)%7; d.setDate(d.getDate()-k); return iso(d); }
+function weekDays(s){ var st=weekStart(s), a=[], i; for(i=0;i<7;i++) a.push(addDays(st,i)); return a; }
+function fmtDay(s){ return parseD(s).toLocaleDateString(undefined,{weekday:'long', day:'numeric', month:'long'}); }
+function fmtShort(s){ return parseD(s).toLocaleDateString(undefined,{day:'numeric', month:'short'}); }
+function daysBetween(a,b){ return Math.round((parseD(b)-parseD(a))/86400000); }
+function num(n){ return n.toLocaleString(undefined,{maximumFractionDigits:0}); }
+
+/* ------------------------------------------------------------------- state */
+var S = {days:{}, checkins:[], favs:SEEDS.slice(), calAdjust:0, changes:[], dismissed:{}};
+try {
+  var raw = JSON.parse(localStorage.getItem(KEY) || '{}');
+  for (var k in raw) if (raw[k] !== undefined && raw[k] !== null) S[k] = raw[k];
+} catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+
+var view = 'today';
+var cur = today();
+
+function defType(ds){ var w = parseD(ds).getDay(); return (w===0 || w===6) ? 'home' : 'shop'; }
+function dayOf(ds){ return S.days[ds] || {type:defType(ds), food:[]}; }
+function editDay(ds){
+  if (!S.days[ds]) S.days[ds] = {type:defType(ds), food:[]};
+  if (!S.days[ds].food) S.days[ds].food = [];
+  return S.days[ds];
+}
+function hoursOf(d){
+  var c = TYPES[d.type];
+  return { work: (typeof d.work === 'number' ? d.work : c.work),
+           drive:(typeof d.drive === 'number' ? d.drive : c.drive) };
+}
+function targetOf(d){
+  var c = TYPES[d.type], h = hoursOf(d);
+  var t = c.base + (h.work - c.work)*KCAL_PER_WORK_HOUR + (h.drive - c.drive)*KCAL_PER_DRIVE_HOUR + S.calAdjust;
+  return Math.max(FLOOR, Math.round(t/25)*25);
+}
+function eatenOf(d){ var s=0,i,f=d.food||[]; for(i=0;i<f.length;i++) s += f[i].c||0; return s; }
+function proteinOf(d){ var s=0,i,f=d.food||[]; for(i=0;i<f.length;i++) s += f[i].p||0; return s; }
+function weekStats(ds){
+  var wd = weekDays(ds), t=0, e=0, left=0, i, d;
+  for (i=0;i<7;i++){
+    d = dayOf(wd[i]);
+    t += targetOf(d);
+    e += eatenOf(d);
+    if (wd[i] >= ds) left++;
+  }
+  return {target:t, eaten:e, daysLeft:left, days:wd};
+}
+
+/* ---------------------------------------------------------------- rendering */
+function el(id){ return document.getElementById(id); }
+
+function renderTypeChips(){
+  var d = dayOf(cur), h = '';
+  for (var k in TYPES){
+    h += '<button class="chip" data-type="'+k+'" aria-pressed="'+(d.type===k)+'">'+
+         TYPES[k].label+'<small>'+TYPES[k].hint+'</small></button>';
+  }
+  el('typeChips').innerHTML = h;
+}
+
+function stepper(kind, label, val){
+  return '<div class="stepper">'+
+    '<b data-step="'+kind+'" data-by="-0.5">&minus;</b>'+
+    '<div class="val"><span>'+val+'h</span><small>'+label+'</small></div>'+
+    '<b data-step="'+kind+'" data-by="0.5">+</b></div>';
+}
+function renderHours(){
+  var d = dayOf(cur), c = TYPES[d.type], h = hoursOf(d), out = '';
+  if (c.wk) out += stepper('work','worked', h.work);
+  if (c.dv) out += stepper('drive','driven', h.drive);
+  el('hours').innerHTML = out;
+}
+
+function bar(pct, cls){
+  return '<div class="bar"><i class="'+(cls||'')+'" style="width:'+Math.min(100,Math.max(0,pct))+'%"></i></div>';
+}
+function renderStats(){
+  var d = dayOf(cur), tgt = targetOf(d), eaten = eatenOf(d), pro = proteinOf(d);
+  var w = weekStats(cur);
+  var left = tgt - eaten, wLeft = w.target - w.eaten;
+  var perDay = w.daysLeft > 0 ? Math.round(wLeft / w.daysLeft) : 0;
+  var h = '';
+
+  h += '<div class="stat"><div class="row"><span class="lbl">Calories</span>'+
+       '<span class="num">'+num(eaten)+' <i>/ '+num(tgt)+'</i></span></div>'+
+       bar(eaten/tgt*100, eaten>tgt?'over':'') +
+       '<div class="note">'+(left>=0 ? num(left)+' left today' : num(-left)+' over today')+'</div></div>';
+
+  h += '<div class="stat"><div class="row"><span class="lbl">Protein</span>'+
+       '<span class="num">'+num(pro)+' <i>/ '+PROTEIN_TARGET+' g</i></span></div>'+
+       bar(pro/PROTEIN_TARGET*100, pro>=PROTEIN_TARGET?'good':'') +
+       '<div class="note">'+(pro>=PROTEIN_TARGET ? 'Target hit' : num(PROTEIN_TARGET-pro)+' g to go')+'</div></div>';
+
+  h += '<div class="stat"><div class="row"><span class="lbl">Week</span>'+
+       '<span class="num">'+num(w.eaten)+' <i>/ '+num(w.target)+'</i></span></div>'+
+       bar(w.eaten/w.target*100, w.eaten>w.target?'over':'') +
+       '<div class="note">'+
+         (wLeft>=0
+           ? num(wLeft)+' left &middot; '+w.daysLeft+' day'+(w.daysLeft===1?'':'s')+' &middot; ~'+num(perDay)+'/day'
+           : num(-wLeft)+' over for the week')+
+       '</div></div>';
+
+  el('stats').innerHTML = h;
+}
+
+function renderBanner(){
+  var d = dayOf(cur), box = el('banner'), now = new Date();
+  var show = d.type === 'install' && cur === today() &&
+             now.getHours() >= 15 && now.getHours() < 22 && !S.dismissed[cur];
+  box.innerHTML = show
+    ? '<div class="banner"><span>Eat your second portion before the drive back.</span>'+
+      '<button id="dismissB" aria-label="Dismiss">&times;</button></div>'
+    : '';
+  if (show) el('dismissB').onclick = function(){ S.dismissed[cur] = 1; save(); renderBanner(); };
+}
+
+function renderToday(){
+  el('dayTitle').textContent = cur === today() ? 'Today' : fmtShort(cur);
+  el('daySub').textContent = fmtDay(cur);
+  el('nextDay').style.visibility = cur >= today() ? 'hidden' : 'visible';
+  renderTypeChips(); renderHours(); renderStats(); renderBanner();
+}
+
+function renderLog(){
+  var d = dayOf(cur), f = d.food || [], h = '', i;
+  el('logSub').textContent = fmtDay(cur) + ' · ' + num(eatenOf(d)) + ' kcal · ' + num(proteinOf(d)) + ' g protein';
+  if (!f.length) h = '<li><span class="nm muted">Nothing logged yet. Tap + to add.</span></li>';
+  for (i=0;i<f.length;i++){
+    h += '<li><span class="nm">'+esc(f[i].n)+'</span>'+
+         '<span class="kc">'+num(f[i].c)+' kcal &middot; '+num(f[i].p)+' g</span>'+
+         '<button class="del" data-del="'+i+'" aria-label="Delete">&times;</button></li>';
+  }
+  el('foodList').innerHTML = h;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* ------------------------------------------------------------------- chart */
+var chartPts = [];
+function showReadout(c, prefix){
+  el('readout').textContent = (prefix ? prefix + '  ·  ' : '') + fmtShort(c.date) + '  ·  ' +
+    (typeof c.weight === 'number' ? c.weight.toFixed(1) + ' kg' : '—') + '  ·  ' +
+    (typeof c.waist === 'number' ? c.waist.toFixed(1) + ' cm' : '—');
+}
+function renderChart(){
+  var cks = S.checkins.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  if (cks.length < 2){
+    el('chart').innerHTML = '<p class="muted">Log two weekly check-ins and the chart appears here.</p>';
+    el('readout').innerHTML = '&nbsp;'; chartPts = []; return;
+  }
+  var W = 320, padL = 34, padR = 46, x0 = padL, x1 = W - padR;
+  var t0 = parseD(cks[0].date).getTime(), t1 = parseD(cks[cks.length-1].date).getTime();
+  var sx = function(t){ return t1 === t0 ? x0 : x0 + (t - t0)/(t1 - t0)*(x1 - x0); };
+  var panels = [
+    {key:'weight', name:'Weight', unit:'kg', color:'var(--s1)', top:26,  h:76, pad:0.4, dec:1},
+    {key:'waist',  name:'Waist',  unit:'cm', color:'var(--s2)', top:142, h:76, pad:0.6, dec:1}
+  ];
+  var svg = '<svg class="viz" viewBox="0 0 '+W+' 246" role="img" aria-label="Weight and waist over time">';
+  chartPts = [];
+
+  panels.forEach(function(p){
+    var vals = [], i;
+    for (i=0;i<cks.length;i++) if (typeof cks[i][p.key] === 'number') vals.push(cks[i][p.key]);
+    if (!vals.length) return;
+    var mn = Math.min.apply(null, vals) - p.pad, mx = Math.max.apply(null, vals) + p.pad;
+    if (mx - mn < 0.6){ mn -= 0.3; mx += 0.3; }
+    var sy = function(v){ return p.top + p.h - (v - mn)/(mx - mn)*p.h; };
+
+    svg += '<text x="0" y="'+(p.top-10)+'" font-size="11" font-weight="600" fill="var(--ink-3)">'+
+           p.name.toUpperCase()+' <tspan fill="var(--ink-3)">('+p.unit+')</tspan></text>';
+    svg += '<line x1="'+x0+'" y1="'+p.top+'" x2="'+x1+'" y2="'+p.top+'" stroke="var(--line)" stroke-width="1"/>';
+    svg += '<line x1="'+x0+'" y1="'+(p.top+p.h)+'" x2="'+x1+'" y2="'+(p.top+p.h)+'" stroke="var(--line)" stroke-width="1"/>';
+    svg += '<text x="'+(x0-5)+'" y="'+(p.top+4)+'" font-size="10" text-anchor="end" fill="var(--ink-3)">'+mx.toFixed(1)+'</text>';
+    svg += '<text x="'+(x0-5)+'" y="'+(p.top+p.h+4)+'" font-size="10" text-anchor="end" fill="var(--ink-3)">'+mn.toFixed(1)+'</text>';
+
+    var pts = [], last = null;
+    for (i=0;i<cks.length;i++){
+      if (typeof cks[i][p.key] !== 'number') continue;
+      var X = sx(parseD(cks[i].date).getTime()), Y = sy(cks[i][p.key]);
+      pts.push(X.toFixed(1)+','+Y.toFixed(1));
+      last = {x:X, y:Y, v:cks[i][p.key]};
+    }
+    svg += '<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+p.color+
+           '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    for (i=0;i<cks.length;i++){
+      if (typeof cks[i][p.key] !== 'number') continue;
+      svg += '<circle cx="'+sx(parseD(cks[i].date).getTime()).toFixed(1)+'" cy="'+sy(cks[i][p.key]).toFixed(1)+
+             '" r="4" fill="'+p.color+'" stroke="var(--surface)" stroke-width="2"/>';
+    }
+    if (last){
+      svg += '<text x="'+(last.x+9)+'" y="'+(last.y+4)+'" font-size="12" font-weight="650" fill="var(--ink)">'+
+             last.v.toFixed(p.dec)+'</text>';
+    }
+  });
+
+  svg += '<text x="'+x0+'" y="238" font-size="10" fill="var(--ink-3)">'+fmtShort(cks[0].date)+'</text>';
+  svg += '<text x="'+x1+'" y="238" font-size="10" text-anchor="end" fill="var(--ink-3)">'+
+         fmtShort(cks[cks.length-1].date)+'</text>';
+  svg += '<line id="cross" x1="0" y1="18" x2="0" y2="222" stroke="var(--ink-3)" stroke-width="1" opacity="0"/>';
+  svg += '<rect id="hit" x="0" y="0" width="'+W+'" height="246" fill="transparent"/>';
+  svg += '</svg>';
+
+  el('chart').innerHTML = svg;
+  showReadout(cks[cks.length-1], 'Latest');
+
+  for (var i=0;i<cks.length;i++) chartPts.push({x:sx(parseD(cks[i].date).getTime()), ck:cks[i]});
+
+  var svgEl = el('chart').querySelector('svg'), cross = el('chart').querySelector('#cross');
+  function probe(ev){
+    var e = ev.touches ? ev.touches[0] : ev;
+    var r = svgEl.getBoundingClientRect();
+    var vx = (e.clientX - r.left) / r.width * W;
+    var best = chartPts[0], i;
+    for (i=1;i<chartPts.length;i++)
+      if (Math.abs(chartPts[i].x - vx) < Math.abs(best.x - vx)) best = chartPts[i];
+    cross.setAttribute('x1', best.x); cross.setAttribute('x2', best.x); cross.setAttribute('opacity','.5');
+    showReadout(best.ck);
+    if (ev.cancelable) ev.preventDefault();
+  }
+  function clear(){ cross.setAttribute('opacity','0'); showReadout(cks[cks.length-1], 'Latest'); }
+  svgEl.addEventListener('touchstart', probe, {passive:false});
+  svgEl.addEventListener('touchmove', probe, {passive:false});
+  svgEl.addEventListener('touchend', clear);
+  svgEl.addEventListener('mousemove', probe);
+  svgEl.addEventListener('mouseleave', clear);
+}
+
+function renderCkTable(){
+  var cks = S.checkins.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  var h = '<tr><th>Date</th><th>kg</th><th>cm</th><th></th></tr>', i;
+  if (!cks.length) h += '<tr><td colspan="4" class="muted">No check-ins yet.</td></tr>';
+  for (i=0;i<cks.length;i++){
+    h += '<tr><td>'+fmtShort(cks[i].date)+'</td>'+
+         '<td>'+(typeof cks[i].weight==='number'?cks[i].weight.toFixed(1):'—')+'</td>'+
+         '<td>'+(typeof cks[i].waist==='number'?cks[i].waist.toFixed(1):'—')+'</td>'+
+         '<td><button class="del" data-ck="'+esc(cks[i].date)+'" aria-label="Delete">&times;</button></td></tr>';
+  }
+  el('ckTable').innerHTML = h;
+}
+
+/* -------------------------------------------------------------- suggestion */
+function avgProtein(days){
+  var end = today(), n = 0, s = 0, i, ds, d;
+  for (i=0;i<days;i++){
+    ds = addDays(end, -i); d = dayOf(ds);
+    if (d.food && d.food.length){ s += proteinOf(d); n++; }
+  }
+  return n >= 3 ? s/n : null;
+}
+function lastChange(kind){
+  var r = null, i;
+  for (i=0;i<S.changes.length;i++) if (S.changes[i].kind === kind) r = S.changes[i];
+  return r;
+}
+function canCut(){
+  // a 200 cut must still leave the busiest day above the floor
+  return (TYPES.shop.base + S.calAdjust - 200) >= FLOOR;
+}
+function move(v, unit){
+  if (v === null || typeof v !== 'number') return 'not measured';
+  if (Math.abs(v) < 0.05) return 'flat';
+  return (v < 0 ? 'down ' : 'up ') + Math.abs(v).toFixed(1) + ' ' + unit;
+}
+function suggestion(){
+  var cks = S.checkins.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  if (cks.length < 2)
+    return {cls:'', t:'Not enough data yet',
+      b:'Log a weekly check-in with weight and waist. After two of them a suggestion shows up here.'};
+
+  var recent = cks.slice(-3), first = recent[0], last = recent[recent.length-1];
+  var weeks = daysBetween(first.date, last.date) / 7;
+  if (weeks < 0.7)
+    return {cls:'', t:'Too soon to tell',
+      b:'Your check-ins are less than a week apart. Give it another week before changing anything.'};
+
+  var dW = last.weight - first.weight;
+  var dWa = (typeof last.waist === 'number' && typeof first.waist === 'number') ? last.waist - first.waist : null;
+  var rate = dW / weeks;
+  var span = 'over ' + (weeks < 1.4 ? '1 week' : weeks.toFixed(1).replace('.0','') + ' weeks');
+
+  if (rate <= -0.7){
+    return {cls:'alert', t:'Losing too fast — ' + Math.abs(rate).toFixed(1) + ' kg/week',
+      b:'Above 0.7 kg a week you start giving up muscle, not just fat. Add about 200 kcal a day and keep protein at 170 g. ' +
+        'Weight is ' + move(dW, 'kg') + ' ' + span + '.',
+      act:{label:'Add 200 kcal/day', kind:'raise', delta:200}};
+  }
+
+  var waistMoving = (dWa !== null && dWa <= -0.5);
+  var weightMoving = rate <= -0.25;
+  if (waistMoving || weightMoving){
+    return {cls:'good', t:'It is working — change nothing',
+      b:'Waist ' + move(dWa, 'cm') + ', weight ' + move(dW, 'kg') + ' ' + span +
+        '. Hold the same calories and protein for another week.'};
+  }
+
+  // ---- flat: one change at a time
+  var flatLine = 'Waist ' + move(dWa, 'cm') + ' and weight ' + move(dW, 'kg') + ' ' + span + '. ';
+  var ap = avgProtein(14);
+  var pTried = lastChange('protein'), cTried = lastChange('cut');
+  var bothTried = pTried && cTried;
+  var oldest = bothTried ? Math.min(daysBetween(pTried.date, today()), daysBetween(cTried.date, today())) : 0;
+  var extra = (bothTried && oldest >= 21)
+    ? 'Protein and the calorie cut have both been running 3+ weeks with a flat waist. Only now is it worth ' +
+      'looking at the eating window — on home days, not work days.'
+    : null;
+
+  if (ap !== null && ap < PROTEIN_TARGET - 5){
+    return {cls:'', t:'Change one thing: protein',
+      b:flatLine + 'You are averaging ' + Math.round(ap) + ' g of protein, under the 170 g target. Fix that first — ' +
+        'it protects muscle and fills you up. Leave calories alone this week.',
+      act:{label:'Started on protein', kind:'protein'}, extra:extra};
+  }
+  if (canCut()){
+    return {cls:'', t:'Change one thing: cut 200 kcal',
+      b:flatLine + 'Protein is where it should be, so take the calories down by 200 a day. ' +
+        'Nothing drops below ' + FLOOR + ' kcal — home days stop at the floor.',
+      act:{label:'Cut 200 kcal/day', kind:'cut', delta:-200}, extra:extra};
+  }
+  return {cls:'', t:'Hold here',
+    b:flatLine + 'Calories are already at the ' + FLOOR + ' kcal floor for your lightest days — cutting further is not on the table. ' +
+      'Keep protein at 170 g, hold the current targets and give the waist another week.',
+    extra:extra};
+}
+function renderSuggestion(){
+  var s = suggestion(), h = '<div class="sug '+s.cls+'"><span class="t">'+s.t+'</span>'+s.b;
+  if (s.extra) h += '<div class="extra">'+s.extra+'</div>';
+  h += '</div>';
+  if (s.act) h += '<button class="btn small" id="applySug" style="margin-top:14px">'+s.act.label+'</button>';
+  if (S.calAdjust !== 0)
+    h += '<div class="note muted" style="margin-top:12px">Current adjustment: '+
+         (S.calAdjust>0?'+':'')+S.calAdjust+' kcal on every day. '+
+         '<button id="resetAdj" style="color:var(--accent);font-weight:600">Reset</button></div>';
+  el('suggestion').innerHTML = h;
+
+  if (s.act) el('applySug').onclick = function(){
+    if (s.act.delta) S.calAdjust += s.act.delta;
+    S.changes.push({date:today(), kind:s.act.kind});
+    save(); renderSuggestion(); renderToday();
+  };
+  if (S.calAdjust !== 0) el('resetAdj').onclick = function(){
+    S.calAdjust = 0; save(); renderSuggestion(); renderToday();
+  };
+}
+
+function renderProg(){
+  var goalW = 88;
+  var cks = S.checkins.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  el('progSub').textContent = cks.length && typeof cks[0].weight === 'number'
+    ? cks[0].weight.toFixed(1) + ' kg · ' + (cks[0].weight - goalW).toFixed(1) + ' kg to 88'
+    : 'Near goal 88 kg · long goal 82 kg';
+  renderChart(); renderSuggestion(); renderCkTable();
+}
+
+function render(){
+  el('v-today').className = view === 'today' ? '' : 'hide';
+  el('v-log').className   = view === 'log'   ? '' : 'hide';
+  el('v-prog').className  = view === 'prog'  ? '' : 'hide';
+  el('fab').className     = (view === 'today' || view === 'log') ? 'fab' : 'fab hide';
+  if (view === 'today') renderToday();
+  if (view === 'log')  renderLog();
+  if (view === 'prog') renderProg();
+}
+
+/* ------------------------------------------------------------------ sheets */
+function openSheet(id){ el(id).classList.add('open'); }
+function closeSheet(id){ el(id).classList.remove('open'); }
+document.addEventListener('click', function(e){
+  var c = e.target.closest('[data-close]');
+  if (c) closeSheet(c.closest('.sheet').id);
+});
+Array.prototype.forEach.call(document.querySelectorAll('.sheet'), function(sh){
+  sh.addEventListener('click', function(e){ if (e.target === sh) closeSheet(sh.id); });
+});
+
+/* --------------------------------------------------------------- food sheet */
+function favList(){
+  var used = S.favs.filter(function(f){ return f.count; })
+    .sort(function(a,b){ return (b.count - a.count) || (a.last < b.last ? 1 : -1); });
+  var seeds = S.favs.filter(function(f){ return !f.count; });
+  return used.concat(seeds).slice(0, 6);
+}
+function renderFavs(){
+  var l = favList(), h = '', i;
+  for (i=0;i<l.length;i++){
+    var idx = S.favs.indexOf(l[i]);
+    h += '<button class="fav'+(l[i].count?'':' seed')+'" data-fav="'+idx+'">'+
+         '<span class="nm">'+esc(l[i].n)+'</span>'+
+         '<span class="kc">'+num(l[i].c)+' kcal &middot; '+num(l[i].p)+' g</span></button>';
+  }
+  el('favs').innerHTML = h ? '<h2>Repeat</h2>' + h : '';
+}
+function openFood(){
+  el('fName').value = ''; el('fCal').value = ''; el('fPro').value = '';
+  renderFavs(); openSheet('foodSheet');
+}
+function addFood(name, cal, pro){
+  var d = editDay(cur);
+  d.food.push({n:name, c:cal, p:pro});
+  var f = null, i;
+  for (i=0;i<S.favs.length;i++)
+    if (S.favs[i].n.toLowerCase() === name.toLowerCase()) f = S.favs[i];
+  if (f){ f.c = cal; f.p = pro; f.count = (f.count||0)+1; f.last = today(); delete f.seed; }
+  else S.favs.push({n:name, c:cal, p:pro, count:1, last:today()});
+  save();
+}
+el('favs').addEventListener('click', function(e){
+  var b = e.target.closest('[data-fav]'); if (!b) return;
+  var f = S.favs[+b.getAttribute('data-fav')];
+  if (f.count){                       // known meal: one tap, done
+    addFood(f.n, f.c, f.p);
+    closeSheet('foodSheet');
+    render();
+  } else {                            // starter: prefill so the numbers get corrected once
+    el('fName').value = f.n; el('fCal').value = f.c; el('fPro').value = f.p;
+  }
+});
+el('fSave').onclick = function(){
+  var n = el('fName').value.trim(), c = parseInt(el('fCal').value, 10), p = parseInt(el('fPro').value, 10);
+  if (!n) { el('fName').focus(); return; }
+  addFood(n, isNaN(c) ? 0 : c, isNaN(p) ? 0 : p);
+  closeSheet('foodSheet');
+  render();
+};
+el('fab').onclick = openFood;
+
+/* ----------------------------------------------------------- checkin sheet */
+el('addCheckin').onclick = function(){
+  var cks = S.checkins.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  el('cDate').value = today();
+  el('cW').value  = cks.length && typeof cks[0].weight === 'number' ? cks[0].weight : '';
+  el('cWa').value = cks.length && typeof cks[0].waist  === 'number' ? cks[0].waist  : '';
+  openSheet('ckSheet');
+};
+el('cSave').onclick = function(){
+  var d = el('cDate').value || today();
+  var w = parseFloat(el('cW').value), wa = parseFloat(el('cWa').value);
+  if (isNaN(w) && isNaN(wa)) { closeSheet('ckSheet'); return; }
+  S.checkins = S.checkins.filter(function(c){ return c.date !== d; });
+  S.checkins.push({date:d, weight:isNaN(w)?null:w, waist:isNaN(wa)?null:wa});
+  save(); closeSheet('ckSheet'); render();
+};
+el('ckTable').addEventListener('click', function(e){
+  var b = e.target.closest('[data-ck]'); if (!b) return;
+  var d = b.getAttribute('data-ck');
+  S.checkins = S.checkins.filter(function(c){ return c.date !== d; });
+  save(); render();
+});
+
+/* ------------------------------------------------------------- interactions */
+el('typeChips').addEventListener('click', function(e){
+  var b = e.target.closest('[data-type]'); if (!b) return;
+  var d = editDay(cur);
+  d.type = b.getAttribute('data-type');
+  delete d.work; delete d.drive;
+  save(); renderToday();
+});
+el('hours').addEventListener('click', function(e){
+  var b = e.target.closest('[data-step]'); if (!b) return;
+  var d = editDay(cur), h = hoursOf(d), k = b.getAttribute('data-step');
+  d[k] = Math.max(0, Math.min(24, h[k] + parseFloat(b.getAttribute('data-by'))));
+  save(); renderHours(); renderStats();
+});
+el('foodList').addEventListener('click', function(e){
+  var b = e.target.closest('[data-del]'); if (!b) return;
+  var d = editDay(cur);
+  d.food.splice(+b.getAttribute('data-del'), 1);
+  save(); render();
+});
+el('prevDay').onclick = function(){ cur = addDays(cur, -1); render(); };
+el('nextDay').onclick = function(){ if (cur < today()) { cur = addDays(cur, 1); render(); } };
+Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function(b){
+  b.onclick = function(){
+    view = b.getAttribute('data-tab');
+    Array.prototype.forEach.call(document.querySelectorAll('.tabs button'), function(o){
+      o.setAttribute('aria-current', o === b ? 'true' : 'false');
+    });
+    window.scrollTo(0, 0);
+    render();
+  };
+});
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden){ if (cur !== today() && view === 'today') { /* keep the day being edited */ } render(); }
+});
+
+render();
+if ('serviceWorker' in navigator)
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+</script>
+</body>
+</html>
