@@ -1,5 +1,5 @@
 // Offline cache. Bump CACHE when index.html changes.
-var CACHE = 'fatloss-v1';
+var CACHE = 'fatloss-v2';
 var ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', function(e){

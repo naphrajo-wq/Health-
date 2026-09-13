@@ -30,10 +30,16 @@ burns. No day target ever goes below 1900 kcal.
 targets as they actually are, so a heavy install day raises the week's allowance
 and a quiet week can absorb it.
 
-**Food.** Name, calories, protein. Anything entered once comes back at the top of
-the add screen as a one-tap repeat. The six starters (labneh, cheese, eggs,
-peanut butter, rice + chicken, tea + sweets) carry rough numbers — correct them
-the first time each one is saved and the corrected version is what repeats.
+**Food.** Name, calories, protein. Every number in the app is one you typed —
+nothing is estimated for you, because the app has no idea whether the labneh is
+Greek or plain, or how many spoons of it went in the bowl.
+
+Anything saved once comes back under *Repeat exactly* with the numbers you gave
+it: one tap logs it again. The pencil beside it opens the same meal with the
+numbers ready to change, for a day the portion was different. The six *name
+shortcuts* (labneh, cheese, eggs, peanut butter, rice + chicken, tea + sweets)
+fill the name and nothing else. Put the amount in the name — "Labneh 200 g" —
+so a repeat means the same thing every time.
 
 **Check-in.** Weight and waist, once a week. Both are plotted against the same
 timeline, each on its own scale. Touch the chart to read a date.

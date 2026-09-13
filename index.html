@@ -115,7 +115,13 @@ h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--ink-3);text-transfo
   background:var(--chip);border:1px solid var(--line);border-radius:14px;text-align:left;min-height:54px}
 .fav .nm{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fav .kc{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fav.seed{margin-bottom:8px}
 .fav.seed .nm{font-weight:500;color:var(--ink-2)}
+.favrow{display:flex;gap:8px;margin-bottom:8px}
+.favrow .fav{flex:1;margin-bottom:0}
+.favedit{width:56px;flex:none;border:1px solid var(--line);border-radius:14px;background:var(--chip);
+  color:var(--ink-3);font-size:18px;display:flex;align-items:center;justify-content:center}
+.favedit:active{background:var(--line-soft)}
 .sheet{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.45);display:none;align-items:flex-end}
 .sheet.open{display:flex}
 .sheet .panel{width:100%;max-height:92vh;overflow:auto;background:var(--bg);
@@ -229,7 +235,8 @@ h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--ink-3);text-transfo
     <h3 id="foodSheetTitle">Add food</h3>
     <div id="favs"></div>
     <div class="field"><label for="fName">Name</label>
-      <input id="fName" type="text" autocomplete="off" autocapitalize="none" enterkeyhint="next"></div>
+      <input id="fName" type="text" autocomplete="off" autocapitalize="none" enterkeyhint="next"
+             placeholder="Labneh 200 g"></div>
     <div class="two">
       <div class="field"><label for="fCal">Calories</label>
         <input id="fCal" type="number" inputmode="numeric" step="10" min="0" enterkeyhint="next"></div>
@@ -270,12 +277,12 @@ var TYPES = {
   home:    {label:'Home',    hint:'low',      base:2000, work:0,  drive:0, wk:false, dv:false}
 };
 var SEEDS = [
-  {n:'Labneh',        c:150, p:6,  seed:true},
-  {n:'Cheese',        c:220, p:14, seed:true},
-  {n:'Eggs',          c:220, p:19, seed:true},
-  {n:'Peanut butter', c:190, p:8,  seed:true},
-  {n:'Rice + chicken',c:650, p:45, seed:true},
-  {n:'Tea + sweets',  c:250, p:3,  seed:true}
+  {n:'Labneh',         seed:true},
+  {n:'Cheese',         seed:true},
+  {n:'Eggs',           seed:true},
+  {n:'Peanut butter',  seed:true},
+  {n:'Rice + chicken', seed:true},
+  {n:'Tea + sweets',   seed:true}
 ];
 var KEY = 'fatloss.v1';
 
@@ -661,20 +668,35 @@ Array.prototype.forEach.call(document.querySelectorAll('.sheet'), function(sh){
 
 /* --------------------------------------------------------------- food sheet */
 function favList(){
-  var used = S.favs.filter(function(f){ return f.count; })
-    .sort(function(a,b){ return (b.count - a.count) || (a.last < b.last ? 1 : -1); });
-  var seeds = S.favs.filter(function(f){ return !f.count; });
-  return used.concat(seeds).slice(0, 6);
+  return S.favs.filter(function(f){ return f.count; })
+    .sort(function(a,b){ return (b.count - a.count) || (a.last < b.last ? 1 : -1); })
+    .slice(0, 6);
 }
 function renderFavs(){
-  var l = favList(), h = '', i;
-  for (i=0;i<l.length;i++){
-    var idx = S.favs.indexOf(l[i]);
-    h += '<button class="fav'+(l[i].count?'':' seed')+'" data-fav="'+idx+'">'+
-         '<span class="nm">'+esc(l[i].n)+'</span>'+
-         '<span class="kc">'+num(l[i].c)+' kcal &middot; '+num(l[i].p)+' g</span></button>';
+  var used = favList(), seeds = S.favs.filter(function(f){ return !f.count; }), h = '', i, idx;
+
+  for (i=0;i<used.length;i++){
+    idx = S.favs.indexOf(used[i]);
+    h += '<div class="favrow">'+
+           '<button class="fav" data-fav="'+idx+'">'+
+             '<span class="nm">'+esc(used[i].n)+'</span>'+
+             '<span class="kc">'+num(used[i].c)+' kcal &middot; '+num(used[i].p)+' g</span>'+
+           '</button>'+
+           '<button class="favedit" data-favedit="'+idx+'" aria-label="Change before adding">&#9998;</button>'+
+         '</div>';
   }
-  el('favs').innerHTML = h ? '<h2>Repeat</h2>' + h : '';
+  if (h) h = '<h2>Repeat exactly</h2>' + h;
+
+  if (seeds.length){
+    var sh = '';
+    for (i=0;i<seeds.length;i++){
+      idx = S.favs.indexOf(seeds[i]);
+      sh += '<button class="fav seed" data-fav="'+idx+'"><span class="nm">'+esc(seeds[i].n)+'</span></button>';
+    }
+    h += '<h2 style="margin-top:16px">Name shortcuts</h2>'+
+         '<p class="muted" style="margin:-4px 0 8px">Fills the name only. The numbers are yours — put the amount in the name, e.g. "Labneh 200 g".</p>'+ sh;
+  }
+  el('favs').innerHTML = h;
 }
 function openFood(){
   el('fName').value = ''; el('fCal').value = ''; el('fPro').value = '';
@@ -691,14 +713,23 @@ function addFood(name, cal, pro){
   save();
 }
 el('favs').addEventListener('click', function(e){
+  var ed = e.target.closest('[data-favedit]');
+  if (ed){                            // same meal, different amount today
+    var g = S.favs[+ed.getAttribute('data-favedit')];
+    el('fName').value = g.n; el('fCal').value = g.c; el('fPro').value = g.p;
+    el('fCal').focus(); el('fCal').select();
+    return;
+  }
   var b = e.target.closest('[data-fav]'); if (!b) return;
   var f = S.favs[+b.getAttribute('data-fav')];
-  if (f.count){                       // known meal: one tap, done
+  if (f.count){                       // your own numbers from last time: one tap, done
     addFood(f.n, f.c, f.p);
     closeSheet('foodSheet');
     render();
-  } else {                            // starter: prefill so the numbers get corrected once
-    el('fName').value = f.n; el('fCal').value = f.c; el('fPro').value = f.p;
+  } else {                            // a name only — nothing is assumed about the amount
+    el('fName').value = f.n;
+    el('fCal').value = ''; el('fPro').value = '';
+    el('fCal').focus();
   }
 });
 el('fSave').onclick = function(){
