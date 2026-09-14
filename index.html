@@ -117,6 +117,13 @@ h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--ink-3);text-transfo
 .fav .kc{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
 .fav.seed{margin-bottom:8px}
 .fav.seed .nm{font-weight:500;color:var(--ink-2)}
+.search{width:100%;min-height:50px;padding:10px 14px;margin-bottom:12px;border-radius:14px;
+  border:1px solid var(--line);background:var(--surface);font-size:16px}
+.search:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.mult{display:flex;gap:8px;margin-bottom:12px}
+.mult button{flex:1;min-height:50px;border:1px solid var(--line);border-radius:14px;background:var(--chip);
+  font-size:16px;font-weight:650;color:var(--ink-2);display:flex;align-items:center;justify-content:center}
+.mult button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .favrow{display:flex;gap:8px;margin-bottom:8px}
 .favrow .fav{flex:1;margin-bottom:0}
 .favedit{width:56px;flex:none;border:1px solid var(--line);border-radius:14px;background:var(--chip);
@@ -233,10 +240,13 @@ h2{font-size:13px;margin:0 0 8px;font-weight:600;color:var(--ink-3);text-transfo
 <div class="sheet" id="foodSheet">
   <div class="panel">
     <h3 id="foodSheetTitle">Add food</h3>
+    <input id="favSearch" class="search hide" type="search" autocomplete="off"
+           autocapitalize="none" placeholder="Search your meals" enterkeyhint="search">
     <div id="favs"></div>
     <div class="field"><label for="fName">Name</label>
       <input id="fName" type="text" autocomplete="off" autocapitalize="none" enterkeyhint="next"
              placeholder="Labneh 200 g"></div>
+    <div id="mult" class="mult hide"></div>
     <div class="two">
       <div class="field"><label for="fCal">Calories</label>
         <input id="fCal" type="number" inputmode="numeric" step="10" min="0" enterkeyhint="next"></div>
@@ -667,13 +677,23 @@ Array.prototype.forEach.call(document.querySelectorAll('.sheet'), function(sh){
 });
 
 /* --------------------------------------------------------------- food sheet */
+var favQuery = '';
+function matches(f){
+  return !favQuery || f.n.toLowerCase().indexOf(favQuery) !== -1;
+}
 function favList(){
-  return S.favs.filter(function(f){ return f.count; })
-    .sort(function(a,b){ return (b.count - a.count) || (a.last < b.last ? 1 : -1); })
-    .slice(0, 6);
+  var used = S.favs.filter(function(f){ return f.count && matches(f); })
+    .sort(function(a,b){ return (b.count - a.count) || (a.last < b.last ? 1 : -1); });
+  return favQuery ? used.slice(0, 12) : used.slice(0, 6);
 }
 function renderFavs(){
-  var used = favList(), seeds = S.favs.filter(function(f){ return !f.count; }), h = '', i, idx;
+  var used = favList(), seeds = S.favs.filter(function(f){ return !f.count && matches(f); }), h = '', i, idx;
+
+  var savedCount = S.favs.filter(function(f){ return f.count; }).length;
+  // once there are real meals to repeat, the bare name list is just clutter
+  if (savedCount >= 4 && !favQuery) seeds = [];
+  el('favSearch').className = savedCount > 6 ? 'search' : 'search hide';
+  if (savedCount <= 6) { el('favSearch').value = ''; favQuery = ''; }
 
   for (i=0;i<used.length;i++){
     idx = S.favs.indexOf(used[i]);
@@ -686,6 +706,7 @@ function renderFavs(){
          '</div>';
   }
   if (h) h = '<h2>Repeat exactly</h2>' + h;
+  else if (favQuery) h = '<p class="muted" style="margin:0 0 8px">Nothing saved matches that. Type the name and numbers below.</p>';
 
   if (seeds.length){
     var sh = '';
@@ -698,17 +719,53 @@ function renderFavs(){
   }
   el('favs').innerHTML = h;
 }
+var base = null;        // the saved meal the portion chips scale from
+var scaled = false;     // true once a chip other than 1x set the numbers
+
+function showMult(f){
+  base = f ? {c:f.c, p:f.p} : null;
+  scaled = false;
+  if (!base){ el('mult').className = 'mult hide'; el('mult').innerHTML = ''; return; }
+  var ms = [[0.5,'\u00bd'], [1,'1'], [1.5,'1\u00bd'], [2,'2'], [3,'3']], h = '', i;
+  for (i=0;i<ms.length;i++)
+    h += '<button data-mult="'+ms[i][0]+'" aria-pressed="'+(ms[i][0]===1)+'">'+ms[i][1]+'</button>';
+  el('mult').innerHTML = h;
+  el('mult').className = 'mult';
+}
+el('mult').addEventListener('click', function(e){
+  var b = e.target.closest('[data-mult]'); if (!b || !base) return;
+  var m = parseFloat(b.getAttribute('data-mult'));
+  el('fCal').value = Math.round(base.c * m);
+  el('fPro').value = Math.round(base.p * m);
+  scaled = m !== 1;
+  Array.prototype.forEach.call(el('mult').children, function(o){
+    o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
+  });
+});
+// typing over the numbers makes them the new normal for that meal
+el('fCal').addEventListener('input', function(){ scaled = false; });
+el('fPro').addEventListener('input', function(){ scaled = false; });
+
 function openFood(){
   el('fName').value = ''; el('fCal').value = ''; el('fPro').value = '';
+  el('favSearch').value = ''; favQuery = '';
+  showMult(null);
   renderFavs(); openSheet('foodSheet');
 }
-function addFood(name, cal, pro){
+el('favSearch').addEventListener('input', function(){
+  favQuery = el('favSearch').value.trim().toLowerCase();
+  renderFavs();
+});
+function addFood(name, cal, pro, keepBase){
   var d = editDay(cur);
   d.food.push({n:name, c:cal, p:pro});
   var f = null, i;
   for (i=0;i<S.favs.length;i++)
     if (S.favs[i].n.toLowerCase() === name.toLowerCase()) f = S.favs[i];
-  if (f){ f.c = cal; f.p = pro; f.count = (f.count||0)+1; f.last = today(); delete f.seed; }
+  if (f){
+    if (!keepBase){ f.c = cal; f.p = pro; }   // a half portion today is not the new normal
+    f.count = (f.count||0)+1; f.last = today(); delete f.seed;
+  }
   else S.favs.push({n:name, c:cal, p:pro, count:1, last:today()});
   save();
 }
@@ -717,7 +774,7 @@ el('favs').addEventListener('click', function(e){
   if (ed){                            // same meal, different amount today
     var g = S.favs[+ed.getAttribute('data-favedit')];
     el('fName').value = g.n; el('fCal').value = g.c; el('fPro').value = g.p;
-    el('fCal').focus(); el('fCal').select();
+    showMult(g);
     return;
   }
   var b = e.target.closest('[data-fav]'); if (!b) return;
@@ -729,13 +786,14 @@ el('favs').addEventListener('click', function(e){
   } else {                            // a name only — nothing is assumed about the amount
     el('fName').value = f.n;
     el('fCal').value = ''; el('fPro').value = '';
+    showMult(null);
     el('fCal').focus();
   }
 });
 el('fSave').onclick = function(){
   var n = el('fName').value.trim(), c = parseInt(el('fCal').value, 10), p = parseInt(el('fPro').value, 10);
   if (!n) { el('fName').focus(); return; }
-  addFood(n, isNaN(c) ? 0 : c, isNaN(p) ? 0 : p);
+  addFood(n, isNaN(c) ? 0 : c, isNaN(p) ? 0 : p, scaled);
   closeSheet('foodSheet');
   render();
 };

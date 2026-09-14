@@ -35,8 +35,11 @@ nothing is estimated for you, because the app has no idea whether the labneh is
 Greek or plain, or how many spoons of it went in the bowl.
 
 Anything saved once comes back under *Repeat exactly* with the numbers you gave
-it: one tap logs it again. The pencil beside it opens the same meal with the
-numbers ready to change, for a day the portion was different. The six *name
+it: one tap logs it again. The pencil beside it opens the same meal with portion
+buttons — ½, 1, 1½, 2, 3 — which scale that meal's own numbers for a day the
+portion was different. A scaled portion is logged but does not become the meal's
+new normal; typing over the numbers does. Past six saved meals a search box
+appears and the bare name shortcuts drop away. The six *name
 shortcuts* (labneh, cheese, eggs, peanut butter, rice + chicken, tea + sweets)
 fill the name and nothing else. Put the amount in the name — "Labneh 200 g" —
 so a repeat means the same thing every time.
